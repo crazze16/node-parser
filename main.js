@@ -11,11 +11,13 @@ app.use(cors());
 
 const getFrequencyLast90Days = async (url) => {
     const browser = await puppeteer.launch({
+        timeout: true,
         headless: true,
         args: ['--lang=en-EN,en', '--no-sandbox', '--single-process', '--no-zygote', '--disable-setuid-sandbox'],
         executablePath: process.env.NODE_ENV === 'production' ?
             process.env.PUPPETEER_EXECUTABLE_PATH :
-            puppeteer.executablePath()
+            puppeteer.executablePath(),
+
     });
 
     const page = await browser.newPage();
