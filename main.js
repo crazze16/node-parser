@@ -1,13 +1,21 @@
 import express from 'express';
 import puppeteer from 'puppeteer';
 import cors from 'cors';
+require("dotenv").config()
+
 
 const app = express();
 const port = 3001;
 app.use(cors());
 
 const getFrequencyLast90Days = async (url) => {
-    const browser = await puppeteer.launch({ headless: true,args: ['--lang=en-EN,en']  }); // Запуск браузера в headless-режиме
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--lang=en-EN,en', '--no-sandbox', '--single-process', '--no-zygote', '--disable-setuid-sandbox'],
+        executablePath: process.env.NODE_ENV === 'production' ?
+            process.env.PUPPETEER_EXECUTABLE_PATH :
+            puppeteer.executablePath()
+    });
 
     const page = await browser.newPage();
 
