@@ -65,11 +65,13 @@ const getFrequencyLast90Days = async (url) => {
 
                             lines.forEach(line => {
                                 const [type, dateStr] = line.split('–');
+                                console.log('type',type)
                                 if (type.trim().includes('Photo') || type.trim().includes('Фотографія')) {
-                                    photoDates.push(dateStr);
+                                    photoDates.push(dateStr.trim());
                                 } else if (type.trim() === 'Video' || type.trim() === 'Відео') {
-                                    videoDates.push(dateStr);
+                                    videoDates.push(dateStr.trim());
                                 }
+                                console.log('photoDates',photoDates)
                             });
                             index++
                         } else {
@@ -118,13 +120,13 @@ const getFrequencyLast90Days = async (url) => {
         const elementsCount = await page.evaluate(selector => {
             return document.querySelectorAll('.Tc0rEd.cKbrCd').length;
         }, selector);
-        totalElements += elementsCount; // Добавляем к общему количеству
+        totalElements += elementsCount;
         const mgX1WContent = await page.evaluate(() => {
             const mgX1WElements = document.querySelectorAll('.mgX1W');
             return Array.from(mgX1WElements, element => element.innerText);
         });
         mgX1WContents = mgX1WContents.concat(mgX1WContent);
-
+        console.log('mgX1WContents',mgX1WContents)
         return totalElements;
     };
 
@@ -225,7 +227,7 @@ const getFrequencyLast90Days = async (url) => {
             await page.waitForSelector(contentSelector);
 
             const totalPosts = await scrollToBottomAndWaitForLoad(contentSelector);
-
+            console.log('totalPosts1',totalPosts)
             const postFrequencyLast90Days = countRecentPosts(mgX1WContents);
             console.log('postFrequencyLast90Days!!',postFrequencyLast90Days)
             return {postFrequencyLast90Days, totalPosts}
