@@ -125,6 +125,7 @@ const getFrequencyLast90Days = async (url) => {
             const mgX1WElements = document.querySelectorAll('.mgX1W');
             return Array.from(mgX1WElements, element => element.innerText);
         });
+        console.log('mgX1WContent',mgX1WContent)
         mgX1WContents = mgX1WContents.concat(mgX1WContent);
         console.log('mgX1WContents',mgX1WContents)
         return totalElements;
@@ -182,7 +183,7 @@ const getFrequencyLast90Days = async (url) => {
 
         posts.forEach(post => {
             let postDate;
-
+            console.log('post',post)
             if (post.includes('minute')) {
                 const minutesAgo = parseInt(post);
                 postDate = new Date();
