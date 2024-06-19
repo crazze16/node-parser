@@ -9,16 +9,18 @@ const app = express();
 const port = 3001;
 app.use(cors());
 
-const getFrequencyLast90Days = async (url) => {
-    const browser = await puppeteer.launch({
-        timeout: 2000,
-        headless: true,
-        args: ['--lang=en-EN,en', "disable-setuid-sandbox", "--no-sandbox", "--no-zygote"],
-        executablePath: process.env.NODE_ENV === 'production' ?
-            process.env.PUPPETEER_EXECUTABLE_PATH :
-            puppeteer.executablePath(),
+const browser = await puppeteer.launch({
+    timeout: 0,
+    headless: false,
+    args: ['--lang=en-EN,en', "disable-setuid-sandbox", "--no-sandbox", "--no-zygote"],
+    executablePath: process.env.NODE_ENV === 'production' ?
+        process.env.PUPPETEER_EXECUTABLE_PATH :
+        puppeteer.executablePath(),
 
-    });
+});
+
+const getFrequencyLast90Days = async (url) => {
+
 
     const page = await browser.newPage();
 
@@ -245,7 +247,7 @@ const getFrequencyLast90Days = async (url) => {
     console.log('totalPosts',totalPosts)
     console.log('total videos',videoDates.length)
 
-    await browser.close();
+    await page.close();
 
     return {
         photoFrequency: photoFrequencyLast90Days,
