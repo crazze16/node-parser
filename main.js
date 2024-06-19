@@ -9,16 +9,18 @@ const app = express();
 const port = 3001;
 app.use(cors());
 
-const getFrequencyLast90Days = async (url) => {
-    const browser = await puppeteer.launch({
-        timeout: 0,
-        headless: true,
-        args: ['--lang=en-EN,en',],
-        executablePath: process.env.NODE_ENV === 'production' ?
-            process.env.PUPPETEER_EXECUTABLE_PATH :
-            puppeteer.executablePath(),
+const browser = await puppeteer.launch({
+    timeout: 0,
+    headless: true,
+    args: ['--lang=en-EN,en',],
+    executablePath: process.env.NODE_ENV === 'production' ?
+        process.env.PUPPETEER_EXECUTABLE_PATH :
+        puppeteer.executablePath(),
 
-    });
+});
+
+const getFrequencyLast90Days = async (url) => {
+
 
     const page = await browser.newPage();
 
@@ -67,11 +69,10 @@ const getFrequencyLast90Days = async (url) => {
                                 const [type, dateStr] = line.split('–');
                                 console.log('type',type)
                                 if (type.trim().includes('Photo') || type.trim().includes('Фотографія')) {
-                                    photoDates.push(dateStr.trim());
+                                    photoDates.push(dateStr);
                                 } else if (type.trim() === 'Video' || type.trim() === 'Відео') {
-                                    videoDates.push(dateStr.trim());
+                                    videoDates.push(dateStr);
                                 }
-                                console.log('photoDates',photoDates)
                             });
                             index++
                         } else {
@@ -125,9 +126,8 @@ const getFrequencyLast90Days = async (url) => {
             const mgX1WElements = document.querySelectorAll('.mgX1W');
             return Array.from(mgX1WElements, element => element.innerText);
         });
-        console.log('mgX1WContent',mgX1WContent)
         mgX1WContents = mgX1WContents.concat(mgX1WContent);
-        console.log('mgX1WContents',mgX1WContents)
+
         return totalElements;
     };
 
@@ -163,7 +163,8 @@ const getFrequencyLast90Days = async (url) => {
                 const [month, year] = post.split(' ');
                 postDate = new Date(Date.parse(`${month} 1, ${year}`));
             }
-
+            console.log('post',post)
+            console.log('postDate', postDate, ninetyDaysAgo,today)
             if (postDate >= ninetyDaysAgo && postDate <= today) {
                 count++;
             }
@@ -183,7 +184,7 @@ const getFrequencyLast90Days = async (url) => {
 
         posts.forEach(post => {
             let postDate;
-            console.log('post',post)
+
             if (post.includes('minute')) {
                 const minutesAgo = parseInt(post);
                 postDate = new Date();
@@ -228,7 +229,7 @@ const getFrequencyLast90Days = async (url) => {
             await page.waitForSelector(contentSelector);
 
             const totalPosts = await scrollToBottomAndWaitForLoad(contentSelector);
-            console.log('totalPosts1',totalPosts)
+
             const postFrequencyLast90Days = countRecentPosts(mgX1WContents);
             console.log('postFrequencyLast90Days!!',postFrequencyLast90Days)
             return {postFrequencyLast90Days, totalPosts}
