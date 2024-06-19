@@ -6,13 +6,13 @@ dotenv.config();
 
 
 const app = express();
-const port = 3001;
+const port = 3002;
 app.use(cors());
 
 const browser = await puppeteer.launch({
     timeout: 0,
     headless: false,
-    args: ['--lang=en-EN,en', "disable-setuid-sandbox", "--no-sandbox", "--no-zygote"],
+    args: ['--lang=en-EN,en', "--no-sandbox"],
     executablePath: process.env.NODE_ENV === 'production' ?
         process.env.PUPPETEER_EXECUTABLE_PATH :
         puppeteer.executablePath(),
@@ -66,7 +66,7 @@ const getFrequencyLast90Days = async (url) => {
                             const lines = text.split('\n');
 
                             lines.forEach(line => {
-                                const [type, dateStr] = line.split('–');
+                                const [type, dateStr] = line?.split('–') || [];
                                 console.log('type',type)
                                 if (type.trim().includes('Photo') || type.trim().includes('Фотографія')) {
                                     photoDates.push(dateStr);
@@ -141,26 +141,26 @@ const getFrequencyLast90Days = async (url) => {
         posts.forEach(post => {
             let postDate;
 
-            if (post.includes('minute')) {
+            if (post?.includes('minute')) {
                 const minutesAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setMinutes(today.getMinutes() - minutesAgo);
-            } else if (post.includes('hour')) {
+            } else if (post?.includes('hour')) {
                 const hoursAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setHours(today.getHours() - hoursAgo);
-            } else if (post.includes('day')) {
+            } else if (post?.includes('day')) {
                 const daysAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setDate(today.getDate() - daysAgo);
-            } else if (post.includes('month')) {
+            } else if (post?.includes('month')) {
                 const monthsAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setMonth(today.getMonth() - monthsAgo);
-            } else if (post.includes('year')) {
+            } else if (post?.includes('year')) {
                 return;
             } else {
-                const [month, year] = post.split(' ');
+                const [month, year] = post?.split(' ') || [];
                 postDate = new Date(Date.parse(`${month} 1, ${year}`));
             }
             console.log('post',post)
@@ -185,27 +185,27 @@ const getFrequencyLast90Days = async (url) => {
         posts.forEach(post => {
             let postDate;
 
-            if (post.includes('minute')) {
+            if (post?.includes('minute')) {
                 const minutesAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setMinutes(today.getMinutes() - minutesAgo);
-            } else if (post.includes('hour')) {
+            } else if (post?.includes('hour')) {
                 const hoursAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setHours(today.getHours() - hoursAgo);
-            } else if (post.includes('day')) {
+            } else if (post?.includes('day')) {
                 const daysAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setDate(today.getDate() - daysAgo);
-            } else if (post.includes('week')) {
+            } else if (post?.includes('week')) {
                 const weeksAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setDate(today.getDate() - weeksAgo * 7);
-            } else if (post.includes('month')) {
+            } else if (post?.includes('month')) {
                 const monthsAgo = parseInt(post);
                 postDate = new Date();
                 postDate.setMonth(today.getMonth() - monthsAgo);
-            } else if (post.includes('year')) {
+            } else if (post?.includes('year')) {
                 return;
             } else {
                 postDate = new Date(Date.parse(post));
@@ -246,6 +246,7 @@ const getFrequencyLast90Days = async (url) => {
     console.log('postFrequencyLast90Days',postFrequencyLast90Days)
     console.log('totalPosts',totalPosts)
     console.log('total videos',videoDates.length)
+    console.log('total photos',photoDates.length)
 
     await page.close();
 
@@ -254,7 +255,8 @@ const getFrequencyLast90Days = async (url) => {
         videoUploads: videoDates.length,
         videoFrequency: videoFrequencyLast90Days,
         totalPosts: totalPosts,
-        postFrequency: postFrequencyLast90Days
+        postFrequency: postFrequencyLast90Days,
+        totalPhotos: photoDates.length
     };
 };
 
