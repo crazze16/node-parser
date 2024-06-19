@@ -2,25 +2,44 @@ import express from 'express';
 import puppeteer from 'puppeteer';
 import cors from 'cors';
 import dotenv from 'dotenv';
+// import http2 from 'http2';
+// import fs from 'fs';
+// import { Worker } from 'worker_threads';
+
 dotenv.config();
 
 
 const app = express();
 const port = 3002;
 app.use(cors());
+app.use(express.json());
 
-const browser = await puppeteer.launch({
-    timeout: 0,
-    headless: false,
-    args: ['--lang=en-EN,en', "--no-sandbox"],
-    executablePath: process.env.NODE_ENV === 'production' ?
-        process.env.PUPPETEER_EXECUTABLE_PATH :
-        puppeteer.executablePath(),
+const replaceHlParam = url => {
+    // Create a new URL object
+    const newUrl = new URL(url);
 
-});
+    // Get the search parameters
+    const searchParams = newUrl.searchParams;
+
+    // Set the 'hl' parameter to 'en'
+    searchParams.set('hl', 'en');
+
+    // Reconstruct the URL
+    return newUrl.toString();
+}
 
 const getFrequencyLast90Days = async (url) => {
-
+    
+    
+    const browser = await puppeteer.launch({
+        timeout: 0,
+        headless: true,
+        args: ['--lang=en-EN,en', "--no-sandbox"],
+        executablePath: process.env.NODE_ENV === 'production' ?
+            process.env.PUPPETEER_EXECUTABLE_PATH :
+            puppeteer.executablePath(),
+    
+    });
 
     const page = await browser.newPage();
 
@@ -37,7 +56,7 @@ const getFrequencyLast90Days = async (url) => {
         });
     });
 
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.goto(replaceHlParam(url), { waitUntil: 'domcontentloaded' });
 
     await page.setViewport({width: 1920, height: 1080});
 
@@ -66,7 +85,7 @@ const getFrequencyLast90Days = async (url) => {
                             const lines = text.split('\n');
 
                             lines.forEach(line => {
-                                const [type, dateStr] = line?.split('–') || [];
+                                const [type, dateStr] = line?.split('-') || line?.split('–') || line?.split('-') || line?.split('-') || [];
                                 console.log('type',type)
                                 if (type.trim().includes('Photo') || type.trim().includes('Фотографія')) {
                                     photoDates.push(dateStr);
@@ -138,8 +157,12 @@ const getFrequencyLast90Days = async (url) => {
 
         let count = 0;
 
-        posts.forEach(post => {
+        posts.forEach((post, index) => {
             let postDate;
+            console.log('post',post)
+            // if(index === posts.length - 1) {
+            //     post = "May 2024";
+            // }
 
             if (post?.includes('minute')) {
                 const minutesAgo = parseInt(post);
@@ -160,8 +183,7 @@ const getFrequencyLast90Days = async (url) => {
             } else if (post?.includes('year')) {
                 return;
             } else {
-                const [month, year] = post?.split(' ') || [];
-                postDate = new Date(Date.parse(`${month} 1, ${year}`));
+                postDate = new Date(Date.parse(post));
             }
             console.log('post',post)
             console.log('postDate', postDate, ninetyDaysAgo,today)
@@ -248,7 +270,7 @@ const getFrequencyLast90Days = async (url) => {
     console.log('total videos',videoDates.length)
     console.log('total photos',photoDates.length)
 
-    await page.close();
+    await browser.close();
 
     return {
         photoFrequency: photoFrequencyLast90Days,
@@ -279,6 +301,40 @@ app.get('/frequency', async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 });
+
+app.post('/frequency2', async (req, res) => {
+    console.log(req);
+    const url = req.body.url;
+    console.log('url', url)
+    if (!url) {
+        res.status(400).send('URL parameter is missing');
+    }
+
+    try {
+        const frequencies = await getFrequencyLast90Days(url);
+        res.json(frequencies);
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+// app.post('/frequency-sse', async (req, res) => {
+//     console.log(req);
+//     const url = req.body.url;
+//     console.log('url', url)
+//     if (!url) {
+//         res.status(400).send('URL parameter is missing');
+//     }
+
+//     try {
+//         const frequencies = await getFrequencyLast90Days(url);
+//         res.json(frequencies);
+//     } catch (error) {
+//         console.error('Error:', error);
+//         res.status(500).send('Internal Server Error');
+//     }
+// });
 
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
