@@ -9,18 +9,16 @@ const app = express();
 const port = 3001;
 app.use(cors());
 
-const browser = await puppeteer.launch({
-    timeout: 0,
-    headless: true,
-    args: ['--lang=en-EN,en',],
-    executablePath: process.env.NODE_ENV === 'production' ?
-        process.env.PUPPETEER_EXECUTABLE_PATH :
-        puppeteer.executablePath(),
-
-});
-
 const getFrequencyLast90Days = async (url) => {
+    const browser = await puppeteer.launch({
+        timeout: 0,
+        headless: true,
+        args: ['--lang=en-EN,en',],
+        executablePath: process.env.NODE_ENV === 'production' ?
+            process.env.PUPPETEER_EXECUTABLE_PATH :
+            puppeteer.executablePath(),
 
+    });
 
     const page = await browser.newPage();
 
