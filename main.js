@@ -31,9 +31,11 @@ const getFrequencyLast90Days = async (url) => {
     
     const browser = await puppeteer.launch({
         timeout: 0,
-        headless: false,
+        headless: true,
         args: ['--lang=en-EN,en', "--no-sandbox"],
-        executablePath: puppeteer.executablePath(),
+        executablePath: process.env.NODE_ENV === 'production' ?
+        process.env.PUPPETEER_EXECUTABLE_PATH :
+        puppeteer.executablePath(),
     });
 
     const page = await browser.newPage();
