@@ -27,18 +27,13 @@ const replaceHlParam = url => {
     // Reconstruct the URL
     return newUrl.toString();
 }
-
 const getFrequencyLast90Days = async (url) => {
-    
     
     const browser = await puppeteer.launch({
         timeout: 0,
-        headless: true,
+        headless: false,
         args: ['--lang=en-EN,en', "--no-sandbox"],
-        executablePath: process.env.NODE_ENV === 'production' ?
-            process.env.PUPPETEER_EXECUTABLE_PATH :
-            puppeteer.executablePath(),
-    
+        // executablePath: '/snap/bin/chromium',
     });
 
     const page = await browser.newPage();
@@ -60,6 +55,13 @@ const getFrequencyLast90Days = async (url) => {
 
     await page.setViewport({width: 1920, height: 1080});
 
+    const buttonSelector = 'button.VfPpkd-LgbsSe';
+    const buttonExists = await page.$(buttonSelector) !== null;
+
+    // Click the button element with class VfPpkd-LgbsSe if it exists
+    if (buttonExists) {
+        await page.click(buttonSelector);
+    }
     const photoDates = [];
     const videoDates = [];
     const allPhotosElement  = await page.waitForSelector('.ofKBgf');
