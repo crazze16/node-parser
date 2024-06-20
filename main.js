@@ -33,7 +33,7 @@ const getFrequencyLast90Days = async (url) => {
         timeout: 0,
         headless: false,
         args: ['--lang=en-EN,en', "--no-sandbox"],
-        // executablePath: '/snap/bin/chromium',
+        executablePath: puppeteer.executablePath(),
     });
 
     const page = await browser.newPage();
@@ -305,7 +305,7 @@ app.get('/frequency', async (req, res) => {
 });
 
 app.post('/frequency2', async (req, res) => {
-    console.log(req);
+    // console.log(req);
     const url = req.body.url;
     console.log('url', url)
     if (!url) {
