@@ -308,6 +308,7 @@ app.get('/frequency', async (req, res) => {
 
 app.post('/frequency2', async (req, res) => {
     // console.log(req);
+    req.setTimeout(120000)
     const url = req.body.url;
     console.log('url', url)
     if (!url) {
