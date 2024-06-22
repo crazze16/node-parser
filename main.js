@@ -311,6 +311,15 @@ app.get('/frequency', async (req, res) => {
     }
 });
 
+app.use((req, res, next) => {
+    res.setTimeout(10000, () => {
+        const error = new Error('Server took too long to respond.');
+        error.status = 503;
+        next(error);
+    });
+    next();
+});
+
 app.post('/frequency2', async (req, res) => {
     // console.log(req);
     req.setTimeout(120000)
