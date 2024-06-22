@@ -77,8 +77,13 @@ const getFrequencyLast90Days = async (url) => {
                     try {
                         const singlePhotoToOpen = await page.waitForSelector(`a[data-photo-index="${index}"]`, { timeout: 2000 });
                         if(singlePhotoToOpen){
-                            await singlePhotoToOpen.click()
-                            const date = await page.waitForSelector('.mqX5ad');
+                            const timeExist = await singlePhotoToOpen.$('.a3lFge') !== null;
+
+                            await singlePhotoToOpen.click();
+                            // const date = await page.waitForSelector('.mqX5ad');
+                            if(timeExist) {
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                            }
                             await page.waitForFunction(() => {
                                 const element = document.querySelector('.mqX5ad');
                                 return element && /\d+/.test(element.textContent.trim());
